@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic
+sentence-transformers
+faiss-cpu
+pypdf
+requests
+python-multipart
+langchain-text-splitters
