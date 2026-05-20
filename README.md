@@ -1,57 +1,118 @@
-# Local RAG Web App
+📄 LocalRAG-AI
+Chat with your PDFs using a fully local RAG pipeline — no API keys, no data leaving your machine.
 
-A fully local Retrieval-Augmented Generation (RAG) web application with a sleek, premium React frontend and a FastAPI backend. 
-It uses `sentence-transformers`, `FAISS`, and a local Ollama instance to index PDFs and answer questions with source citations.
+LocalRAG-AI is a full-stack web application that lets you upload PDF documents, index them locally, and ask natural language questions. The system retrieves relevant passages and generates accurate answers with source citations, all running on your own hardware.
 
-## Prerequisites
+https://img.shields.io/github/last-commit/Madhavan20906/LocalRAG-AI
+https://img.shields.io/badge/python-3.9+-blue
+https://img.shields.io/badge/node-18+-green
+https://img.shields.io/badge/ollama-mistral-orange
 
-1.  **Python 3.9+**
-2.  **Node.js 18+**
-3.  **Ollama**: Install from [ollama.com](https://ollama.com/) and run the mistral model:
-    ```bash
-    ollama run mistral
-    ```
+✨ Features
+🔒 100% local – No external APIs, no data sharing, complete privacy.
 
-## Setup & Running
+💬 Chat with your PDFs – Ask questions in natural language.
 
-### 1. Backend
+📎 Source citations – Each answer references the original PDF and page.
 
-Open a terminal and navigate to the backend directory:
-```bash
+🧠 RAG pipeline – Uses sentence-transformers, FAISS, and Ollama.
+
+🎨 Modern UI – Built with React + Vite and a custom premium design system.
+
+⚡ Fast – Asynchronous FastAPI backend, responsive frontend.
+
+🧱 Tech Stack
+Layer	Technologies
+Backend	FastAPI, sentence-transformers, FAISS, LangChain text splitters, requests
+Frontend	React, Vite, Vanilla CSS, lucide-react icons
+LLM & Embeddings	Ollama (mistral), local embedding model (all-MiniLM-L6-v2 style)
+📋 Prerequisites
+Before you begin, make sure you have the following installed:
+
+Python 3.9+
+
+Node.js 18+
+
+Ollama – Download here
+
+Then pull the Mistral model:
+
+bash
+ollama run mistral
+The first pull might take a few minutes. Once done, Ollama will keep the model ready locally.
+
+🚀 Getting Started
+1. Clone the repository
+bash
+git clone https://github.com/Madhavan20906/LocalRAG-AI.git
+cd LocalRAG-AI
+2. Backend setup
+bash
 cd backend
-```
-
-Install dependencies:
-```bash
 pip install -r requirements.txt
-```
-
-Run the FastAPI server:
-```bash
 python main.py
-```
-*The API will be available at http://localhost:8000*
+The backend API will be available at http://localhost:8000
 
-### 2. Frontend
+3. Frontend setup
+Open a new terminal and run:
 
-Open a new terminal and navigate to the frontend directory:
-```bash
+bash
 cd frontend
-```
-
-Install dependencies:
-```bash
 npm install
-```
-
-Start the development server:
-```bash
 npm run dev
-```
-*Open http://localhost:5173 to view the application.*
+Visit http://localhost:5173 to use the app.
 
-## Architecture
-- **Backend**: FastAPI, `langchain-text-splitters` for chunking, `sentence-transformers` for embeddings, `faiss-cpu` for vector storage, and `requests` to talk to local Ollama.
-- **Frontend**: Vite + React, Vanilla CSS with custom design system, lucide-react for icons.
-"# LocalRAG-AI" 
-"# LocalRAG-AI" 
+🖥️ Usage
+Upload one or more PDF files using the UI.
+
+Wait for the system to chunk and index the documents (FAISS vector store).
+
+Type your question in the chat box.
+
+Get an answer with citations pointing to the source PDF and text snippet.
+
+📁 Project Structure
+text
+LocalRAG-AI/
+├── backend/               # FastAPI app
+│   ├── main.py            # API endpoints & orchestration
+│   ├── requirements.txt   # Python dependencies
+│   └── ...
+├── frontend/              # React + Vite app
+│   ├── src/               # UI components & styles
+│   ├── package.json
+│   └── ...
+└── README.md
+🧠 How it works (Local RAG pipeline)
+Ingestion – PDFs are loaded, split into overlapping chunks.
+
+Embedding – Each chunk is converted into a vector using a local sentence-transformer model.
+
+Storage – Vectors are stored and indexed with FAISS for fast similarity search.
+
+Query – Your question is embedded and compared against stored vectors.
+
+Retrieval – Top-k relevant chunks are retrieved.
+
+Generation – Retrieved chunks + question are sent to local Ollama (mistral) to generate an answer.
+
+Citation – The response includes references to source documents.
+
+🤝 Contributing
+Contributions are welcome! Feel free to open issues or submit pull requests to improve functionality, UI, or documentation.
+
+📄 License
+This project is open source and available under the MIT License.
+
+🙌 Acknowledgments
+Ollama for easy local LLM management
+
+Sentence Transformers
+
+FAISS
+
+FastAPI
+
+React + Vite
+
+Made with ❤️ by Madhavan — keep your documents intelligent and private.
