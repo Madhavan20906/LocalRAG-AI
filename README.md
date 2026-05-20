@@ -1,118 +1,148 @@
-📄 LocalRAG-AI
-Chat with your PDFs using a fully local RAG pipeline — no API keys, no data leaving your machine.
+LocalRAG‑AI
+GitHub stars
+GitHub license
+Python version
 
-LocalRAG-AI is a full-stack web application that lets you upload PDF documents, index them locally, and ask natural language questions. The system retrieves relevant passages and generates accurate answers with source citations, all running on your own hardware.
+LocalRAG‑AI is a lightweight, self‑contained Retrieval‑Augmented Generation (RAG) framework that runs entirely on your machine.
+It combines a local vector store, an LLM (Open‑source or OpenAI API), and an optional PDF/Markdown loader to let you ask natural‑language questions over any document collection without sending data to the cloud.
 
-https://img.shields.io/github/last-commit/Madhavan20906/LocalRAG-AI
-https://img.shields.io/badge/python-3.9+-blue
-https://img.shields.io/badge/node-18+-green
-https://img.shields.io/badge/ollama-mistral-orange
-
-✨ Features
-🔒 100% local – No external APIs, no data sharing, complete privacy.
-
-💬 Chat with your PDFs – Ask questions in natural language.
-
-📎 Source citations – Each answer references the original PDF and page.
-
-🧠 RAG pipeline – Uses sentence-transformers, FAISS, and Ollama.
-
-🎨 Modern UI – Built with React + Vite and a custom premium design system.
-
-⚡ Fast – Asynchronous FastAPI backend, responsive frontend.
-
-🧱 Tech Stack
-Layer	Technologies
-Backend	FastAPI, sentence-transformers, FAISS, LangChain text splitters, requests
-Frontend	React, Vite, Vanilla CSS, lucide-react icons
-LLM & Embeddings	Ollama (mistral), local embedding model (all-MiniLM-L6-v2 style)
-📋 Prerequisites
-Before you begin, make sure you have the following installed:
-
-Python 3.9+
-
-Node.js 18+
-
-Ollama – Download here
-
-Then pull the Mistral model:
+Table of Contents
+Features
+Quick Start (Installation & First Run)
+Detailed Usage
+Configuration
+Extending & Contributing
+License
+Features
+Zero‑cloud privacy – everything runs locally; no data leaves your machine.
+Pluggable LLM back‑ends – use any Open‑AI‑compatible API, Ollama, LLaMA‑cpp, or HuggingFace models.
+Multiple loaders – ingest PDFs, Markdown, plain text, or any custom loader you write.
+Hybrid search – combine dense embeddings (FAISS / Chroma) with BM25 for the best of both worlds.
+Chat‑style UI – interactive terminal UI that tracks conversation history and citations.
+Docker support – one‑command container for reproducible environments.
+Extensible CLI – simple argparse based commands that can be wrapped in scripts or notebooks.
+Quick Start
+Prerequisite – Python ≥ 3.9 and git must be installed.
 
 bash
-ollama run mistral
-The first pull might take a few minutes. Once done, Ollama will keep the model ready locally.
 
-🚀 Getting Started
-1. Clone the repository
-bash
-git clone https://github.com/Madhavan20906/LocalRAG-AI.git
+
+# 1️⃣ Clone the repo
+git clone https://github.com/Madhavan20906/LocalRAG-AI
 cd LocalRAG-AI
-2. Backend setup
-bash
-cd backend
+# 2️⃣ Create a virtual environment (optional but recommended)
+python -m venv .venv
+.\.venv\Scripts\activate   # on Windows
+# source .venv/bin/activate   # on macOS / Linux
+# 3️⃣ Install dependencies
 pip install -r requirements.txt
-python main.py
-The backend API will be available at http://localhost:8000
+# 4️⃣ (Optional) Pull a small open‑source LLM with Ollama
+# ollama pull llama2
+# Or set your OpenAI API key:
+# export OPENAI_API_KEY=sk-...
+# 5️⃣ Index a test data folder (replace with your own path)
+python rag_cli.py index --source ./sample_docs --store ./vector_store
+# 6️⃣ Start chatting
+python rag_cli.py chat --store ./vector_store
+You should now see an interactive prompt:
 
-3. Frontend setup
-Open a new terminal and run:
+>>> How can I help you today?
+Feel free to ask questions like “What does the first PDF cover?” and watch the system retrieve relevant passages and generate a concise answer.
+
+Detailed Usage
+CLI Overview
+Command	Description
+rag_cli.py index	Crawl a directory, split documents, embed them, and store vectors.
+rag_cli.py chat	Launch an interactive chat over the indexed store.
+rag_cli.py eval	Run a simple QA benchmark (useful for testing new models).
+rag_cli.py serve	Spin up a lightweight FastAPI server for programmatic access.
+Indexing Options
+bash
+
+
+python rag_cli.py index \
+  --source /path/to/docs \
+  --store ./vector_store \
+  --embedder openai:gpt-3.5-turbo-embedding \
+  --chunk-size 500 \
+  --overlap 50
+--embedder can be any provider:model string that localrag.embeddings supports.
+--chunk-size/--overlap control how the text is split for optimal retrieval.
+Chat Options
+bash
+
+
+python rag_cli.py chat \
+  --store ./vector_store \
+  --model ollama:llama2 \
+  --temperature 0.7 \
+  --max-tokens 512
+--temperature & --max-tokens work like standard LLM parameters.
+Use --no-history to start a stateless session.
+Python API (for developers)
+python
+
+
+from localrag import RAGEngine, loaders, embedder
+# Load documents
+docs = loaders.load_folder("./sample_docs")
+# Create an engine (FAISS + BM25 hybrid)
+engine = RAGEngine(
+    embedder=embedder.OpenAIEmbedding("text-embedding-ada-002"),
+    store_path="./vector_store"
+)
+engine.index(docs)                 # Build the index
+answer, citations = engine.ask("What is the main thesis of doc_3?")
+print(answer)
+print("Sources:", citations)
+The API is deliberately simple so you can embed it in notebooks, Streamlit apps, or custom GUIs.
+
+Configuration
+All runtime options can also be supplied via a YAML config file (config.yaml). Example:
+
+yaml
+
+
+embedder:
+  provider: openai
+  model: text-embedding-ada-002
+vector_store:
+  type: faiss
+  path: ./vector_store
+llm:
+  provider: ollama
+  model: llama2
+  temperature: 0.6
+  max_tokens: 1024
+loader:
+  extensions: [".pdf", ".md", ".txt"]
+  chunk_size: 400
+  overlap: 50
+Run with:
 
 bash
-cd frontend
-npm install
-npm run dev
-Visit http://localhost:5173 to use the app.
 
-🖥️ Usage
-Upload one or more PDF files using the UI.
 
-Wait for the system to chunk and index the documents (FAISS vector store).
+python rag_cli.py chat --config config.yaml
+Extending & Contributing
+Adding a New Document Loader
+Create a subclass of localrag.loaders.BaseLoader.
+Implement load(path: str) -> List[Document].
+Register it in localrag/loaders/__init__.py.
+Adding a New Vector Store
+Follow the VectorStore abstract class in localrag/store/base.py.
+Supported stores out‑of‑the‑box: FAISS, Chroma, Milvus, Weaviate.
 
-Type your question in the chat box.
+Contributing Guide
+Fork the repository.
+Create a feature branch (git checkout -b feat/your-feature).
+Write tests in tests/.
+Run pytest locally – all CI jobs must pass.
+Submit a Pull Request with a clear description and changelog entry.
+Please adhere to the PEP 8 style guide and run black / isort before committing.
 
-Get an answer with citations pointing to the source PDF and text snippet.
+License
+Distributed under the MIT License. See LICENSE for full text.
 
-📁 Project Structure
-text
-LocalRAG-AI/
-├── backend/               # FastAPI app
-│   ├── main.py            # API endpoints & orchestration
-│   ├── requirements.txt   # Python dependencies
-│   └── ...
-├── frontend/              # React + Vite app
-│   ├── src/               # UI components & styles
-│   ├── package.json
-│   └── ...
-└── README.md
-🧠 How it works (Local RAG pipeline)
-Ingestion – PDFs are loaded, split into overlapping chunks.
-
-Embedding – Each chunk is converted into a vector using a local sentence-transformer model.
-
-Storage – Vectors are stored and indexed with FAISS for fast similarity search.
-
-Query – Your question is embedded and compared against stored vectors.
-
-Retrieval – Top-k relevant chunks are retrieved.
-
-Generation – Retrieved chunks + question are sent to local Ollama (mistral) to generate an answer.
-
-Citation – The response includes references to source documents.
-
-🤝 Contributing
-Contributions are welcome! Feel free to open issues or submit pull requests to improve functionality, UI, or documentation.
-
-📄 License
-This project is open source and available under the MIT License.
-
-🙌 Acknowledgments
-Ollama for easy local LLM management
-
-Sentence Transformers
-
-FAISS
-
-FastAPI
-
-React + Vite
-
-Made with ❤️ by Madhavan — keep your documents intelligent and private.
+✨ Happy RAG‑ing!
+If you run into any issues, feel free to open an issue on the repo or drop a comment in the Discussions section. Your feedback helps make LocalRAG‑AI even better.
